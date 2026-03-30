@@ -65,6 +65,22 @@ Includes tables for:
 
 ---
 
+## 📷 Screenshots
+
+### 🔐 Login Page
+![Login](home.png)
+
+### 📍 Booking Page
+![Booking](booking.png)
+
+### 🚖 Ride Options
+![Ride Options](ride-options.png)
+
+### 💳 Payment Page
+![Payment](payment.png)
+
+---
+
 ## 📷 Output
 Interactive web app for fare comparison and booking simulation
 
