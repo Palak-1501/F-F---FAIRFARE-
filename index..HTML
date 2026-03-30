@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FAIRFARE — Merged Interactive App</title>
+  <style>
+    /* ====== THEME (Option B: Teal Glassmorphic) ====== */
+    :root{
+      --bg1: #0f9b8e;
+      --bg2: #0a6f63;
+      --card: rgba(255,255,255,0.98);
+      --muted: #7b9aa0;
+      --accent: #00b3a6;
+      --glass: rgba(255,255,255,0.06);
+      --shadow: 0 8px 28px rgba(6,28,30,0.25);
+      --radius: 14px;
+      --soft-radius: 10px;
+    }
+    *{box-sizing:border-box;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+    html,body{height:100%;margin:0;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:#053230;}
+    body{display:flex;align-items:center;justify-content:center;padding:28px;}
+    .app {
+      width:100%;
+      max-width:1100px;
+      min-height:640px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border-radius:20px;
+      padding:20px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+      overflow:hidden;
+      position:relative;
+      border:1px solid rgba(255,255,255,0.06);
+    }
+
+    /* Header / Navbar */
+    header.nav{
+      display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:12px;
+    }
+    .brand{
+      display:flex;gap:12px;align-items:center;
+      color:white;font-weight:700;font-size:18px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+    .brand .logo{
+      width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+      box-shadow: inset 0 -4px 12px rgba(0,0,0,0.12);
+      font-size:22px;
+    }
+    .nav-actions{display:flex;gap:12px;align-items:center;}
+    .btn {
+      background:linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
+      border-radius:10px;padding:8px 12px;border:none;cursor:pointer;font-weight:600;
+      box-shadow: 0 4px 14px rgba(5,50,48,0.12);
+    }
+    .btn.ghost{background:rgba(255,255,255,0.92);
+  color:#063a36;                    
+  border:1px solid rgba(5,50,48,0.25);
+}
+.btn.ghost:hover{
+  background:white;
+  border-color:#0a6f63;
+}
+
+    .btn.primary{background:linear-gradient(180deg,var(--accent), #008f86);color:white;border:none;}
+    .user-pill{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.08);color:white;}
+
+    /* Main layout */
+    .container{
+      margin-top:14px;display:grid;grid-template-columns:1fr 360px;gap:18px;
+    }
+
+    /* Left column (pages) */
+    .left{
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.9));
+      border-radius:16px;padding:20px;height:calc(100% - 20px);overflow:auto;
+      box-shadow: 0 12px 40px rgba(2,40,39,0.08);
+    }
+    /* Right column */
+    .right{
+      background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border-radius:14px;padding:18px;color:white;min-height:240px;
+      display:flex;flex-direction:column;gap:12px;justify-content:flex-start;
+    }
+
+    /* Generic card */
+    .card{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow: 0 8px 24px rgba(19,73,68,0.06);transition:transform .25s ease,box-shadow .25s ease;}
+    .card:hover{transform:translateY(-6px);box-shadow: 0 18px 46px rgba(18,70,66,0.09);}
+
+    h2{margin:0 0 6px 0;color:#043a36;}
+    p.muted{color:var(--muted);margin:0 0 8px 0;font-size:13px;}
+
+    /* ====== LOGIN / SIGNUP ====== */
+    .auth {
+      max-width:500px;margin:26px auto 12px auto;
+    }
+    .auth .toggle{
+      display:flex;border-radius:12px;background:var(--glass);padding:6px;border:1px solid rgba(255,255,255,0.06);
+      width:fit-content;gap:6px;
+    }
+    .toggle button{background:transparent;border:none;color:white;padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:700;opacity:0.8;}
+    .toggle button.active{background:linear-gradient(90deg,var(--bg1),var(--bg2));box-shadow: 0 6px 18px rgba(0,0,0,0.18);color:white;opacity:1;}
+
+    .form{margin-top:14px;background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,255,255,0.98));padding:18px;border-radius:12px;}
+    .field{display:flex;flex-direction:column;margin-bottom:12px;}
+    label{font-weight:700;color:#0b534f;margin-bottom:6px;font-size:13px;}
+    input[type="text"],input[type="password"],input[type="email"],select{
+      padding:10px 12px;border-radius:10px;border:1px solid rgba(5,50,48,0.08);outline:none;font-size:14px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+    .field-inline{display:flex;gap:8px;}
+    .small{font-size:13px;color:var(--muted);margin-top:6px;}
+    .show-pass{cursor:pointer;font-weight:700;color:var(--accent);font-size:13px;}
+
+    /* Home / Location selection */
+    .home-grid{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
+    .home-card{flex:1;min-width:220px;padding:12px;border-radius:12px;background:linear-gradient(180deg,#fff,#fbffff);}
+
+    /* Booking form */
+    .booking{display:grid;gap:12px;}
+    .row{display:flex;gap:12px;}
+    .col{flex:1;}
+    .datalist-input{position:relative;}
+    input[list]::-webkit-calendar-picker-indicator{display:none;}
+
+    /* Buttons area */
+    .actions{display:flex;gap:10px;align-items:center;margin-top:6px;}
+    .search-box{display:flex;gap:8px;align-items:center;padding:8px;border-radius:10px;background:#fff;border:1px solid rgba(5,50,48,0.04);}
+
+    /* Ride options */
+    .ride-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;}
+    .ride-card{
+      display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:12px;background:linear-gradient(180deg,#ffffff,#fbffff);
+      border:1px solid rgba(2,40,39,0.03);
+    }
+    .ride-top{display:flex;align-items:center;justify-content:space-between;}
+    .platform{display:flex;gap:10px;align-items:center;}
+    .plat-logo{width:44px;height:44;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;background:linear-gradient(135deg,rgba(0,0,0,0.03),rgba(255,255,255,0.6));}
+    .vehicle{font-size:14px;font-weight:700;color:#053a36;}
+    .price{font-weight:800;font-size:20px;color:#083d38;}
+    .eta{font-size:13px;color:var(--muted);}
+
+    /* Popup */
+    .overlay{position:fixed;inset:0;background:rgba(2,22,21,0.48);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;pointer-events:none;transition:all .2s ease;}
+    .overlay.open{opacity:1;pointer-events:auto;}
+    .popup{background:white;padding:18px;border-radius:12px;min-width:320px;max-width:520px;box-shadow:0 20px 60px rgba(3,30,28,0.3);}
+
+    /* Confirmed page */
+    .confirmed{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:28px;
+    }
+    .driver-card{display:flex;gap:12px;align-items:center;background:linear-gradient(180deg,rgba(255,255,255,0.95),#fff);padding:12px;border-radius:12px;width:100%;}
+    .driver-avatar{width:72px;height:72px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:white;}
+    .meta{display:flex;flex-direction:column;align-items:flex-start;}
+
+    /* Booking history */
+    .history-list{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto;}
+    .history-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;background:rgba(255,255,255,0.92);border:1px solid rgba(2,40,39,0.03);}
+
+    /* Footer small */
+    .muted-small{font-size:12px;color:var(--muted);}
+
+    /* Hidden sections via JS */
+    .page{display:none;opacity:0;transform:translateY(8px);transition:all .28s ease;}
+    .page.active{display:block;opacity:1;transform:translateY(0);}
+
+    /* Responsive */
+    @media (max-width:980px){
+      .container{grid-template-columns:1fr;}.right{order:2;}
+      body{padding:12px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="FAIRFARE App — Merged">
+    <!-- Header / Navbar -->
+    <header class="nav" style="padding-bottom:6px;">
+      <div class="brand">
+        <div class="logo" title="FairFare">🚖</div>
+        <div>
+          FAIRFARE <div style="font-weight:400;font-size:12px;color:rgba(255,255,255,0.9);margin-top:2px;">Eco-friendly Fare Intelligence</div>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <button id="navHistoryBtn" class="btn ghost" title="Booking history">📜 History</button>
+        <div id="userPill" class="user-pill" style="display:none;">
+          <div id="userNameHead">Hi, User</div>
+          <button id="logoutBtn" class="btn" title="Logout">Logout</button>
+        </div>
+        <button id="loginNavBtn" class="btn primary">Login / Signup</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <!-- LEFT: Pages -->
+      <div class="left">
+
+        <!-- AUTH: Login / Signup -->
+        <section id="page-auth" class="page active card" aria-live="polite">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <h2>Welcome to FAIRFARE</h2>
+              <p class="muted">Smart. Eco-friendly. Transparent fares — compare and choose.</p>
+            </div>
+           
+
+          <div class="auth">
+            <div class="toggle" role="tablist" aria-label="auth toggle">
+              <button id="toggleLogin" class="active" role="tab" aria-selected="true">Login</button>
+              <button id="toggleSignup" role="tab" aria-selected="false">Sign Up</button>
+            </div>
+
+            <!-- Forms -->
+            <div id="formLogin" class="form" aria-live="polite">
+              <div class="field">
+                <label for="loginEmail">Email or Phone</label>
+                <input id="loginEmail" type="text" placeholder="you@example.com or +91 98765 43210" />
+              </div>
+              <div class="field">
+                <label for="loginPass">Password</label>
+                <div class="password-container" style="display:flex;gap:8px;align-items:center;">
+                  <input id="loginPass" type="password" placeholder="Enter Password" style="flex:1;">
+                  <button id="loginShowPass" class="btn ghost" type="button">👁️</button>
+                </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
+                <div>
+                  <label style="font-weight:600;font-size:13px;color:#0b534f;">Remember me</label>
+                </div>
+                <div>
+                  <button id="doLogin" class="btn primary">Login</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="formSignup" class="form" style="display:none;">
+              <div class="field">
+                <label for="signupName">Full name</label>
+                <input id="signupName" type="text" placeholder="Your full name" />
+              </div>
+              <div class="field">
+                <label for="signupEmail">Email</label>
+                <input id="signupEmail" type="email" placeholder="you@example.com" />
+              </div>
+              <div class="field">
+                <label for="signupPass">Password</label>
+                <div class="password-container" style="display:flex;gap:8px;align-items:center;">
+                  <input id="signupPass" type="password" placeholder="Choose a password" style="flex:1;">
+                  <button id="signupShowPass" class="btn ghost" type="button">👁️</button>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:flex-end;">
+                <button id="doSignup" class="btn primary">Create account</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- HOME / LOCATION SELECTION (Option 2) -->
+        <section id="page-home" class="page card" aria-hidden="true">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <h2>Welcome back</h2>
+              <p class="muted">Select your region to get started — pickup/drop suggestions update with city.</p>
+            </div>
+            <div style="font-size:13px;color:var(--muted)">Start > Booking > Compare</div>
+          </div>
+
+          <div style="margin-top:12px;" class="home-grid">
+            <div class="home-card card">
+              <h3 style="margin-top:0;">Choose State</h3>
+              <div class="field">
+                <label for="homeState">State / Union Territory</label>
+                <select id="homeState">
+                  <option value="">Select State / UT</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="homeCity">City</label>
+                <select id="homeCity">
+                  <option value="">Select City</option>
+                </select>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:8px;">
+                <button id="startBookingBtn" class="btn primary">Continue to Booking</button>
+                <button id="quickMumbaiBtn" class="btn ghost">Quick: Mumbai</button>
+              </div>
+            </div>
+
+            <div class="home-card card">
+              <h3 style="margin-top:0;">Quick Tips</h3>
+              <p class="muted">• Select your city to populate smart suggestions.<br>• You can later type custom pickup/drop even if suggestions exist.<br>• All data is demo-only and stored locally.</p>
+              <div style="margin-top:12px;">
+                <div style="font-weight:700;margin-bottom:6px;">Saved Account</div>
+                <div id="homeAccountPanel" class="muted-small">Not logged in</div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- BOOKING PAGE -->
+        <section id="page-booking" class="page card" aria-hidden="true">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <h2>Book a Ride</h2>
+              <p class="muted">Choose pickup and drop — then compare fares across platforms.</p>
+            </div>
+            <div style="font-size:13px;color:var(--muted)">Teal Theme • Demo</div>
+          </div>
+
+          <div style="margin-top:12px;" class="card">
+            <form id="bookingForm" class="booking" onsubmit="return false;">
+              <div class="row">
+                <div class="col field">
+                  <label for="stateSelect">State / Union Territory</label>
+                  <select id="stateSelect" required>
+                    <option value="">Select State / UT</option>
+                  </select>
+                </div>
+                <div class="col field">
+                  <label for="citySelect">City</label>
+                  <select id="citySelect" required>
+                    <option value="">Select City</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col field">
+                  <label for="pickup">Pickup (searchable)</label>
+                  <input id="pickup" list="pickupList" placeholder="Type or choose pickup..." />
+                  <datalist id="pickupList"></datalist>
+                </div>
+                <div class="col field">
+                  <label for="drop">Drop (searchable)</label>
+                  <input id="drop" list="dropList" placeholder="Type or choose drop..." />
+                  <datalist id="dropList"></datalist>
+                </div>
+              </div>
+
+              <div class="row">
+                                <div class="col field">
+                  <label for="ecoPref">Eco Preference</label>
+                  <select id="ecoPref">
+                    <option value="neutral">Neutral</option>
+                    <option value="eco">Prefer EV / Low-emission</option>
+                    <option value="fast">Prefer Fast ETA</option>
+                  </select>
+                </div>
+              </div>
+
+<!-- Vehicle Selection Icons -->
+<div style="margin-top:12px;">
+  <label style="font-weight:700;color:#0b534f;vehicle-icon {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  width:90px;
+  height:90px;
+  border-radius:12px;
+  background:white;
+  cursor:pointer;
+  font-size:28px;
+  font-weight:700;
+  border:2px solid transparent;
+  transition:all 0.3s ease;
+}
+
+.vehicle-icon span{
+  font-size:12px;
+  margin-top:4px;
+}
+
+.vehicle-icon:hover{
+  transform:translateY(-4px);
+  box-shadow:0 8px 20px rgba(0,0,0,0.15);
+}
+
+.vehicle-icon.active{
+  border:2px solid var(--accent);
+  background:linear-gradient(180deg,#eafffb,#ffffff);
+}">Choose Vehicle Type</label>
+
+  <div id="vehicleIconGrid" style="display:flex;gap:14px;margin-top:8px;flex-wrap:wrap;">
+
+    <div class="vehicle-icon" data-vehicle="Bike">🏍️<span>Bike</span></div>
+    <div class="vehicle-icon" data-vehicle="Auto">🛺<span>Auto</span></div>
+    <div class="vehicle-icon" data-vehicle="Mini">🚕<span>Mini</span></div>
+    <div class="vehicle-icon" data-vehicle="Sedan">🚗<span>Sedan</span></div>
+    <div class="vehicle-icon" data-vehicle="SUV">🚙<span>SUV</span></div>
+    <div class="vehicle-icon" data-vehicle="EV Car">⚡🚗<span>EV Car</span></div>
+
+  </div>
+</div>
+
+              <div class="actions">
+                <button id="compareBtn" class="btn primary">Compare Prices 🔎</button>
+                <div class="muted-small">Tip: Pickup & Drop have predefined suggestions but you can type freely.</div>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- RIDE OPTIONS -->
+        <section id="page-ride-options" class="page card" aria-hidden="true">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <h2>Ride Options</h2>
+              <p class="muted">Choose the best combination of fare, ETA and vehicle.</p>
+            </div>
+            <div>
+              <button id="backToBook" class="btn ghost">← Back</button>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <div id="rideGrid" class="ride-grid"></div>
+          </div>
+        </section>
+
+        <!-- RIDE CONFIRMED -->
+        <section id="page-confirmed" class="page card" aria-hidden="true">
+          <div class="confirmed">
+            <h2>Your ride is confirmed! 🎉</h2>
+            <div class="driver-card" id="driverCard">
+              <div class="driver-avatar" id="driverAvatar">🧑‍✈️</div>
+              <div class="meta">
+                <div id="driverName" style="font-weight:800;font-size:18px;color:#063a36;">Driver: Ram</div>
+                <div id="driverETA" class="muted">Arriving in 7 mins • Vehicle: Sedan</div>
+                <div id="driverPlatform" class="muted" style="margin-top:6px;">Platform: Uber • Price: ₹199</div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:12px;">
+              <button id="cancelRideBtn" class="btn ghost">Cancel Ride</button>
+              <button id="bookAnotherBtn" class="btn primary">Book Another Ride</button>
+            </div>
+
+            <div class="muted-small">You can see this booking in Booking History.</div>
+          </div>
+        </section>
+
+        <!-- BOOKING HISTORY -->
+        <section id="page-history" class="page card" aria-hidden="true">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <h2>Booking History</h2>
+              <p class="muted">All demo bookings are stored locally (JS array). Refresh will clear unless you save to localStorage.</p>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button id="saveHistoryBtn" class="btn">Save (local)</button>
+              <button id="LoadeHistoryBtn" class="btn ghost">Load</button>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;" class="history-list card" id="historyList">
+            <!-- items injected by JS -->
+          </div>
+          <div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end;">
+            <button id="clearHistoryBtn" class="btn ghost">Clear History</button>
+          </div>
+        </section>
+
+        <!-- PAYMENT PAGE -->
+<section id="page-payment" class="page card" aria-hidden="true">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <h2>Complete Payment</h2>
+      <p class="muted">Choose your payment method</p>
+    </div>
+    <div>
+      <button id="backToOptionsBtn" class="btn ghost">← Back</button>
+    </div>
+  </div>
+
+  <div style="margin-top:20px;font-size:18px;font-weight:700;">
+    Amount to Pay: <span id="paymentAmount">₹0</span>
+  </div>
+
+  <div style="margin-top:20px;display:grid;gap:20px;">
+
+    <!-- Card Payment -->
+    <div class="card">
+      <h3>💳 Credit / Debit Card</h3>
+      <div class="field">
+        <label>Card Number</label>
+        <input type="text" placeholder="1234 5678 9012 3456">
+      </div>
+      <div class="field-inline">
+        <div class="field" style="flex:1;">
+          <label>Expiry</label>
+          <input type="text" placeholder="MM/YY">
+        </div>
+        <div class="field" style="flex:1;">
+          <label>CVV</label>
+          <input type="password" placeholder="123">
+        </div>
+      </div>
+      <button class="btn primary payBtn">Pay Now</button>
+    </div>
+
+    <!-- UPI Payment -->
+    <div class="card">
+      <h3>📱 UPI Payment</h3>
+      <div class="field">
+        <label>Enter UPI ID</label>
+        <input type="text" placeholder="example@upi">
+      </div>
+      <button class="btn primary payBtn">Pay via UPI</button>
+    </div>
+
+    <!-- QR Code -->
+    <div class="card" style="text-align:center;">
+      <h3>🧾 Scan QR Code</h3>
+      <p style="font-weight:700;margin-top:8px;">
+  Pay: <span id="qrPaymentAmount">₹0</span>
+</p>
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=FAIRFARE_DEMO_PAYMENT"
+           alt="QR Code Example"
+           style="margin:15px auto;">
+      <div class="muted-small">Scan using any UPI app</div>
+      <button class="btn primary payBtn" style="margin-top:10px;">Pay Now!</button>
+    </div>
+
+  </div>
+</section> 
+
+      </div>
+
+      <!-- RIGHT: Quick info, tips, stats -->
+      <aside class="right">
+        <div class="card" style="background:linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.92));">
+          <h3 style="color:#064b46;margin-bottom:6px;">Quick Tips</h3>
+          <p class="muted">• Use "Prefer EV" to see more EV options like BluSmart.<br>• Pickup/Drop suggestions update when you change city.<br>• All data is demo-only and stored locally.</p>
+        </div>
+
+        <div class="card" style="background:linear-gradient(135deg,var(--bg1),var(--bg2));color:white;">
+          <h3 style="margin:0 0 6px 0;">Estimate</h3>
+          <div id="estimateMini" style="font-size:18px;font-weight:700;">—</div>
+          <div class="muted-small" style="opacity:0.9;margin-top:6px;">This is a simulated estimate for demo purposes only.</div>
+        </div>
+
+        <div class="card" style="background:linear-gradient(180deg,rgba(255,255,255,0.96),#fff);">
+          <h3 style="margin:0 0 6px 0;color:#063a36;">Your Account</h3>
+          <div id="accountPanel">
+            <div class="muted-small">Not logged in</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Confirmation Popup -->
+    <div id="overlay" class="overlay" aria-hidden="true">
+      <div class="popup card" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
+        <h3 id="popupTitle">Confirm Ride</h3>
+        <div id="popupDetails" style="margin-top:8px;color:#064b46;"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">
+          <button id="chooseAnotherBtn" class="btn ghost">Choose Another Ride</button>
+          <button id="confirmRideBtn" class="btn primary">Confirm Ride</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /****************************************************************
+     * Merged FAIRFARE App
+     * - Flow: AUTH -> HOME (location selection) -> BOOKING -> RIDE OPTIONS -> CONFIRMED -> HISTORY
+     * - Option B styling kept. Map removed as requested.
+     ****************************************************************/
+
+    // -------------------------
+    // App state & constants
+    // -------------------------
+    const PAGES = {
+      AUTH: 'page-auth',
+      HOME: 'page-home',
+      BOOKING: 'page-booking',
+      RIDE_OPTIONS: 'page-ride-options',
+      CONFIRMED: 'page-confirmed',
+      HISTORY: 'page-history',
+      PAYMENT: 'page-payment',
+    };
+
+    const PLATFORMS = [
+      { id:'ola', name:'Ola' },
+      { id:'uber', name:'Uber' },
+      { id:'rapido', name:'Rapido' },
+      { id:'indrive', name:'inDrive' },
+      { id:'savaari', name:'Savaari' },
+      { id:'meru', name:'Meru' },
+      { id:'blusmart', name:'BluSmart' } // EV
+    ];
+
+    const VEHICLE_TYPES = [
+      {key:'Bike', icon:'🏍️'},
+      {key:'Auto', icon:'🛺'},
+      {key:'Sedan', icon:'🚗'},
+      {key:'SUV', icon:'🚙'},
+      {key:'Mini', icon:'🚕'},
+      {key:'EV Car', icon:'⚡🚗'}
+    ];
+
+    // Pre-built list of Indian states/UTs + major cities (same as ride.html)
+    const STATE_CITY_MAP = {
+      "Andhra Pradesh":["Visakhapatnam","Vijayawada","Guntur","Nellore","Tirupati","Kadapa","Rajahmundry","Anantapur","Chittoor","Eluru","Ongole"],
+      "Arunachal Pradesh":["Itanagar","Naharlagun","Tawang","Ziro","Pasighat","Bomdila","Tezu"],
+      "Assam":["Guwahati","Dibrugarh","Silchar","Jorhat","Tezpur","SivaSagar","Nagaon","Barpeta","Tinsukia","Karimganj"],
+      "Bihar":["Patna","Gaya","Muzaffarpur","Bhagalpur","Darbhanga","Purnia","Ara","BeguSarai","Katihar","Sitamarhi","Sasaram"],
+      "Chhattisgarh":["Raipur","Bhilai","Korba","Bilaspur","Durg","Raigarh"],
+      "Goa":["Panaji","Margao","Vasco da Gama","Mapusa"],
+      "Gujarat":["Ahmedabad","Surat","Vadodara","Rajkot","Gandhinagar","Bhavnagar","Jamnagar","Junagadh","Porbandar","Anand"],
+      "Haryana":["Gurgaon","Hisar","Faridabad","Panipat","Karnal","Rohtak","Ambala","Sonipat"],
+      "Himachal Pradesh":["Shimla","Dharamshala","Solan","Mandi","Kullu","Manali"],
+      "Jharkhand":["Ranchi","Jamshedpur","Dhanbad","Bokaro","Hazaribagh","Deoghar","Giridih"],
+      "Karnataka":["Bengaluru","Mysore","Mangalore","Hubballi","Belagavi","Dharwad","Kalaburagi","Shivamogga"],
+      "Kerala":["Kochi","Thiruvananthapuram","Kozhikode","Kollam","Thrissur","Kannur","Alappuzha"],
+      "Madhya Pradesh":["Indore","Bhopal","Gwalior","Jabalpur","Ujjain","Sagar"],
+      "Maharashtra":["Mumbai","Pune","Nagpur","Nashik","Thane","Aurangabad","Solapur","Amravati","Kolhapur","Sangli","Jalgaon"],
+      "Manipur":["Imphal","Thoubal","Kakching","Churachandpur"],
+      "Meghalaya":["Shillong","Tura","Nongpoh","Jowai"],
+      "Mizoram":["Aizawl","Lunglei","Champhai","Serchhip"],
+      "Nagaland":["Kohima","Dimapur","Mokokchung","Tuensang"],
+      "Odisha":["Bhubaneswar","Cuttack","Rourkela","Sambalpur","Puri","Balasore","Berhampur"],
+      "Punjab":["Chandigarh","Ludhiana","Amritsar","Jalandhar","Patiala","Bathinda","Mohali"],
+      "Rajasthan":["Jaipur","Jodhpur","Udaipur","Ajmer","Kota","Bikaner","Alwar","Bharatpur"],
+      "Sikkim":["Gangtok","Namchi","Gyalshing","Mangan"],
+      "Tamil Nadu":["Chennai","Coimbatore","Madurai","Tiruchirappalli","Salem","Tirunelveli","Erode","Vellore"],
+      "Telangana":["Hyderabad","Warangal","Nizamabad","Khammam","Karimnagar","Mahabubnagar"],
+      "Tripura":["Agartala","Udaipur","Dharmanagar","Kailashahar"],
+      "Uttar Pradesh":["Lucknow","Kanpur","Agra","Varanasi","Noida","Greater Noida","Prayagraj","Ghaziabad","Meerut","Gorakhpur","Mathura","Aligarh","Bareilly"],
+      "Uttarakhand":["Dehradun","Haridwar","Rishikesh","Haldwani","Roorkee","Nainital"],
+      "West Bengal":["Kolkata","Howrah","Durgapur","Siliguri","Asansol","Kharagpur"],
+      "Andaman and Nicobar Islands":["Port Blair"],
+      "Chandigarh":["Chandigarh"],
+      "Dadra and Nagar Haveli and Daman and Diu":["Daman","Diu","Silvassa"],
+      "Delhi (NCT)":["New Delhi","Connaught Place","Dwarka","Rohini"],
+      "Jammu & Kashmir":["Srinagar","Jammu"],
+      "Ladakh":["Leh","Kargil"],
+      "Lakshadweep":["Kavaratti"],
+      "Puducherry":["Puducherry","Karaikal"]
+    };
+
+    const GENERIC_LOCATIONS = [
+      "Airport","Railway Station","City Center","Main Market","Bus Stand","Mall","Tech Park","University","Hospital","Residential Area"
+    ];
+
+    // Booking history array & state
+    let bookingHistory = [];
+    let currentUser = null;
+    let lastSearch = null;
+    let selectedVehicleType = null;
+
+    // -------------------------
+    // Utility helpers
+    // -------------------------
+    function $(id){ return document.getElementById(id); }
+    function showPage(pageId){
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      const el = $(pageId);
+      if(el) el.classList.add('active');
+      // nav UI updates
+      const logged = !!currentUser;
+      $('userPill').style.display = logged ? 'flex' : 'none';
+      $('loginNavBtn').style.display = logged ? 'none' : 'inline-block';
+      updateAccountPanel();
+    }
+    function formatCurrency(n){ return '₹' + Number(n).toFixed(0); }
+    function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+    function pseudoDistance(a,b){
+      if(!a || !b) return randInt(2,12);
+      const s = (a + '|' + b).split('').reduce((acc,ch)=>acc + ch.charCodeAt(0), 0);
+      return Math.max(1, Math.round((s % 18) + 1)); // 2..19 km
+    }
+
+    // Price / ETA calculators (simple demo)
+    function estimatePrice(platformId, vehicle, km){
+      const baseRates = { ola:20, uber:22, rapido:15, indrive:18, savaari:45, meru:30, blusmart:28 };
+      const perKm = { Bike:4, Auto:7, Sedan:12, SUV:18, Mini:9, 'EV Car':13 };
+      let base = baseRates[platformId] || 20;
+      let rate = perKm[vehicle] || 12;
+      let mult = 1;
+      if(platformId==='indrive') mult = 0.95;
+      if(platformId==='savaari') mult = 1.25;
+      if(platformId==='blusmart') mult = 1.05;
+      let price = base + rate * km * mult;
+      const surge = Math.random() < 0.12 ? (1 + Math.random()*0.35) : 1;
+      return Math.max(35, Math.round(price * surge));
+    }
+    function estimateETA(km, vehicle){
+      let base = Math.max(3, Math.round(km/1.5 + (vehicle==='Bike'?0: (vehicle==='Auto'?2:4))));
+      base += randInt(0,4);
+      return base;
+    }
+    const DRIVER_NAMES = ["Ram","Rohit","Mayank","Arjun","Manoj","Aisha","Sneha","Deepak","Karan","Pooja","Ishaan","Ritu"];
+    function pickDriverName(){ return DRIVER_NAMES[randInt(0, DRIVER_NAMES.length-1)]; }
+
+    // -------------------------
+    // Initialization
+    // -------------------------
+    function init(){
+      populateStateSelects();
+      hookupListeners();
+      // load saved history if available
+      const saved = JSON.parse(localStorage.getItem('fairfare_history') || '[]');
+      if(saved && saved.length) bookingHistory = saved;
+      renderHistory();
+      // preselect demo to make interaction quicker
+      preselectDemo();
+    }
+
+    function populateStateSelects(){
+      const stateKeys = Object.keys(STATE_CITY_MAP).sort();
+      ['stateSelect','homeState'].forEach(id=>{
+        const sel = $(id);
+        sel.innerHTML = '<option value="">Select State / UT</option>';
+        stateKeys.forEach(s=>{
+          const opt = document.createElement('option'); opt.value = s; opt.textContent = s;
+          sel.appendChild(opt);
+        });
+      });
+    }
+
+    function hookupListeners(){
+      // auth toggles
+      $('toggleLogin').addEventListener('click', ()=>{ toggleAuth('login'); });
+      $('toggleSignup').addEventListener('click', ()=>{ toggleAuth('signup'); });
+      $('loginShowPass').addEventListener('click', ()=>toggleShowPassword('loginPass','loginShowPass'));
+      $('signupShowPass').addEventListener('click', ()=>toggleShowPassword('signupPass','signupShowPass'));
+      $('doLogin').addEventListener('click', doLogin);
+      $('doSignup').addEventListener('click', doSignup);
+
+      // nav buttons
+      $('loginNavBtn').addEventListener('click', ()=>showPage(PAGES.AUTH));
+      $('logoutBtn').addEventListener('click', ()=>{ currentUser=null; updateAccountPanel(); showPage(PAGES.AUTH); });
+      $('navHistoryBtn').addEventListener('click', ()=>showPage(PAGES.HISTORY));
+
+      // home -> booking
+      $('startBookingBtn').addEventListener('click', ()=> {
+        // copy home selection into booking selects and go to booking page
+        const s = $('homeState').value; const c = $('homeCity').value;
+        if(!s || !c){ alert('Select state and city to continue.'); return; }
+        $('stateSelect').value = s;
+        // trigger change to populate cities then set city value
+        populateCityForState('stateSelect');
+        setTimeout(()=>{ $('citySelect').value = c; populateLocationDatalists(s,c); }, 10);
+        showPage(PAGES.BOOKING);
+      });
+      $('quickMumbaiBtn').addEventListener('click', ()=> {
+        $('homeState').value = 'Maharashtra';
+        populateCityForState('homeState');
+        setTimeout(()=>{ $('homeCity').value = 'Mumbai'; }, 10);
+      });
+
+      // booking page listeners
+      $('stateSelect').addEventListener('change', ()=>populateCityForState('stateSelect'));
+      $('citySelect').addEventListener('change', ()=>populateLocationDatalists($('stateSelect').value, $('citySelect').value));
+      $('homeState').addEventListener('change', ()=>populateCityForState('homeState','homeCity'));
+      $('homeCity').addEventListener('change', ()=>{/* no-op for home */});
+
+      $('compareBtn').addEventListener('click', onCompare);
+      $('backToOptionsBtn').addEventListener('click', ()=> {
+  showPage(PAGES.RIDE_OPTIONS);
+});
+
+document.querySelectorAll('.payBtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    alert('Payment Successful!');
+    showPage(PAGES.CONFIRMED);
+  });
+});
+      $('backToBook').addEventListener('click', ()=>showPage(PAGES.BOOKING));
+      $('chooseAnotherBtn').addEventListener('click', closePopup);
+      $('confirmRideBtn').addEventListener('click', confirmRide);
+      $('cancelRideBtn').addEventListener('click', cancelConfirmedRide);
+      $('bookAnotherBtn').addEventListener('click', ()=>showPage(PAGES.BOOKING));
+      $('saveHistoryBtn').addEventListener('click', ()=>localStorage.setItem('fairfare_history', JSON.stringify(bookingHistory)));
+      $('loadHistoryBtn').addEventListener('click', ()=>{ const h = JSON.parse(localStorage.getItem('fairfare_history')||'[]'); bookingHistory=h; renderHistory(); });
+      $('clearHistoryBtn').addEventListener('click', ()=>{ bookingHistory=[]; renderHistory(); localStorage.removeItem('fairfare_history'); });
+
+      // overlay click to close
+      $('overlay').addEventListener('click', (e)=>{ if(e.target === $('overlay')) closePopup(); });
+
+      // page helper: login nav button shows auth
+      // initial UI update
+      updateAccountPanel();
+    }
+
+    // Vehicle icon selection
+document.querySelectorAll('.vehicle-icon').forEach(icon=>{
+  icon.addEventListener('click', ()=>{
+    
+    document.querySelectorAll('.vehicle-icon')
+      .forEach(i=>i.classList.remove('active'));
+
+    icon.classList.add('active');
+    selectedVehicleType = icon.getAttribute('data-vehicle');
+  });
+});
+
+    // Auth toggles and functions
+    function toggleAuth(mode){
+      if(mode==='login'){
+        $('toggleLogin').classList.add('active'); $('toggleSignup').classList.remove('active');
+        $('formLogin').style.display = 'block'; $('formSignup').style.display = 'none';
+      } else {
+        $('toggleSignup').classList.add('active'); $('toggleLogin').classList.remove('active');
+        $('formLogin').style.display = 'none'; $('formSignup').style.display = 'block';
+      }
+    }
+    function toggleShowPassword(inputId,btnId){
+      const inp = $(inputId); const b = $(btnId);
+      if(inp.type==='password'){ inp.type='text'; b.textContent='Hide'; }
+      else { inp.type='password'; b.textContent='👁️'; }
+    }
+
+    function doSignup(){
+      const name = $('signupName').value.trim();
+      const email = $('signupEmail').value.trim() || 'user@example.com';
+      const pass = $('signupPass').value;
+      if(!name || !pass){ alert('Please fill name and password to sign up.'); return; }
+      currentUser = { name, email };
+      $('userNameHead').textContent = 'Hi, ' + name.split(' ')[0];
+      showPage(PAGES.HOME); updateAccountPanel();
+    }
+
+    function doLogin(){
+      const email = $('loginEmail').value.trim() || 'Guest';
+      const pass = $('loginPass').value;
+      currentUser = { name: email.includes('@')? email.split('@')[0] : email, email };
+      $('userNameHead').textContent = 'Hi, ' + (currentUser.name || 'User');
+      showPage(PAGES.HOME); updateAccountPanel();
+    }
+
+    function updateAccountPanel(){
+      $('accountPanel').innerHTML = currentUser ? `<div style="font-weight:800">${currentUser.name}</div><div class="muted-small">${currentUser.email||''}</div>` : `<div class="muted-small">Not logged in</div>`;
+      $('homeAccountPanel').innerHTML = currentUser ? `<div style="font-weight:700">${currentUser.name}</div><div class="muted-small">${currentUser.email||''}</div>` : `<div class="muted-small">Not logged in</div>`;
+      $('userPill').style.display = currentUser ? 'flex' : 'none';
+      $('loginNavBtn').style.display = currentUser ? 'none' : 'inline-block';
+    }
+
+    // Populate city selects when state changes
+    function populateCityForState(stateSelectId, targetCitySelectId){
+      const sel = $(stateSelectId);
+      const citySelId = targetCitySelectId || (stateSelectId === 'homeState' ? 'homeCity' : 'citySelect');
+      const citySel = $(citySelId);
+      const state = sel.value;
+      const cities = STATE_CITY_MAP[state] || [];
+      citySel.innerHTML = '<option value="">Select City</option>';
+      cities.forEach(c=>{ const opt = document.createElement('option'); opt.value=c; opt.textContent=c; citySel.appendChild(opt); });
+      // if stateSelectId is booking's stateSelect and a city already exists in home selection, populate pickup/drop
+      if(stateSelectId === 'stateSelect' && citySel.options.length === 2) populateLocationDatalists(state, citySel.value);
+    }
+
+    function populateLocationDatalists(stateOrCity, city){
+      const cityName = city || stateOrCity || '';
+      const pickupList = $('pickupList'); const dropList = $('dropList');
+      pickupList.innerHTML = ''; dropList.innerHTML = '';
+      const basePlaces = GENERIC_LOCATIONS.concat(['Central Park','Tech Hub','Old Town','Main Square','City Mall','Airport Terminal','Railway Station','Medical Center']);
+      const suggestions = basePlaces.slice(0,12).map(p => cityName ? `${p}, ${cityName}` : p );
+      suggestions.forEach(s=>{
+        const o = document.createElement('option'); o.value = s; pickupList.appendChild(o);
+        const o2 = document.createElement('option'); o2.value = s; dropList.appendChild(o2);
+      });
+    }
+
+    // When user clicks Compare
+    function onCompare(e){
+      e.preventDefault();
+      const state = $('stateSelect').value;
+      const city = $('citySelect').value;
+      const pickup = $('pickup').value.trim();
+      const drop = $('drop').value.trim();
+      const pref = selectedVehicleType;
+
+if(!pref){
+  alert('Please select a vehicle type.');
+  return;
+}
+      const eco = $('ecoPref').value;
+
+      if(!state || !city){ alert('Please select State and City.'); return; }
+      if(!pickup || !drop){ alert('Please enter both Pickup and Drop locations.'); return; }
+
+      const km = pseudoDistance(pickup, drop);
+      lastSearch = { state, city, pickup, drop, km, pref, eco, time: new Date().toISOString() };
+      $('estimateMini').textContent = `${km} km • Est. travel time ${Math.max(5,Math.round(km*2))} mins`;
+      generateRideOptions(lastSearch);
+      showPage(PAGES.RIDE_OPTIONS);
+      document.querySelector('.left').scrollTop = 0;
+    }
+
+    // Generate ride option cards
+    function generateRideOptions({state,city,pickup,drop,km,pref,eco}){
+      const grid = $('rideGrid'); grid.innerHTML = '';
+      PLATFORMS.forEach(platform=>{
+        VEHICLE_TYPES.forEach(v=>{
+          if(eco === 'eco' && v.key !== 'EV Car' && Math.random() < 0.35) return;
+          if(pref && pref !== v.key) return;
+          if(platform.id === 'blusmart' && v.key !== 'EV Car') return;
+          if(platform.id === 'rapido' && v.key === 'Sedan' && Math.random() < 0.7) return;
+
+          const price = estimatePrice(platform.id, v.key, km);
+          const eta = estimateETA(km, v.key);
+
+          const card = document.createElement('div'); card.className='ride-card card';
+          card.innerHTML = `
+            <div class="ride-top">
+              <div class="platform">
+                <div class="plat-logo" title="${platform.name}">${platform.name[0]}</div>
+                <div>
+                  <div class="vehicle">${v.icon} ${v.key}</div>
+                  <div class="muted-small">${platform.name}</div>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div class="price">${formatCurrency(price)}</div>
+                <div class="eta">${eta} mins • ${km} km</div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+              <div class="muted-small">Est. drop: ${drop.split(',')[0]}</div>
+              <div>
+                <button class="btn" data-platform="${platform.name}" data-platid="${platform.id}" data-vehicle="${v.key}" data-price="${price}" data-eta="${eta}">Book Now</button>
+              </div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      });
+
+      if(grid.children.length === 0){
+        grid.innerHTML = `<div class="card" style="padding:20px;">No rides matched your filters — try changing preferences.</div>`;
+      } else {
+        sortRideGridByPrice(grid);
+      }
+
+      grid.querySelectorAll('button[data-platform]').forEach(btn=>{
+        btn.addEventListener('click', (ev)=>{
+          const b = ev.currentTarget;
+          const details = {
+            platform: b.getAttribute('data-platform'),
+            platformId: b.getAttribute('data-platid'),
+            vehicle: b.getAttribute('data-vehicle'),
+            price: Number(b.getAttribute('data-price')),
+            eta: Number(b.getAttribute('data-eta'))
+          };
+          openConfirmationPopup(details);
+        });
+      });
+    }
+
+    function sortRideGridByPrice(grid){
+      const items = Array.from(grid.children);
+      items.sort((a,b)=>{
+        const pa = Number(a.querySelector('button[data-price]').getAttribute('data-price'));
+        const pb = Number(b.querySelector('button[data-price]').getAttribute('data-price'));
+        return pa - pb;
+      });
+      grid.innerHTML = ''; items.forEach(i=>grid.appendChild(i));
+    }
+
+    // Popup
+    function openConfirmationPopup(details){
+      $('overlay').classList.add('open'); $('overlay').setAttribute('aria-hidden','false');
+      const txt = `
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div style="font-size:36px;">${getVehicleIcon(details.vehicle)}</div>
+          <div style="flex:1;">
+            <div style="font-weight:800;font-size:16px;color:#063a36;">${details.platform} • ${details.vehicle}</div>
+            <div class="muted-small">ETA: ${details.eta} mins • Price: ${formatCurrency(details.price)}</div>
+            <div class="muted-small" style="margin-top:6px;">From: ${lastSearch.pickup} → To: ${lastSearch.drop}</div>
+          </div>
+        </div>
+      `;
+      $('popupDetails').innerHTML = txt;
+      $('overlay').dataset.selected = JSON.stringify(details);
+    }
+
+    function closePopup(){ $('overlay').classList.remove('open'); $('overlay').setAttribute('aria-hidden','true'); delete $('overlay').dataset.selected; }
+
+    function getVehicleIcon(vehicle){
+      const map = { 'Bike':'🏍️','Auto':'🛺','Sedan':'🚗','SUV':'🚙','Mini':'🚕','EV Car':'⚡🚗' };
+      return map[vehicle] || '🚗';
+    }
+
+    // Confirm ride
+    function confirmRide(){
+      const selected = JSON.parse($('overlay').dataset.selected || '{}');
+      if(!selected) return;
+      const booking = {
+        id: 'BK' + Date.now(),
+        platform: selected.platform,
+        platformId: selected.platformId,
+        vehicle: selected.vehicle,
+        price: selected.price,
+        eta: selected.eta,
+        pickup: lastSearch.pickup,
+        drop: lastSearch.drop,
+        date: new Date().toLocaleString(),
+        status: 'Booked',
+        driver: pickDriverName()
+      };
+      bookingHistory.unshift(booking);
+      renderHistory();
+      $('driverName').textContent = `Driver: ${booking.driver}`;
+      $('driverETA').textContent = `Arriving in ${booking.eta} mins • Vehicle: ${booking.vehicle}`;
+      $('driverPlatform').textContent = `Platform: ${booking.platform} • Price: ${formatCurrency(booking.price)}`;
+      setDriverAvatarIcon(booking.vehicle);
+      closePopup();
+      $('paymentAmount').textContent = formatCurrency(booking.price);
+      $('paymentAmount').textContent = formatCurrency(booking.price);
+      $('qrPaymentAmount').textContent = formatCurrency(booking.price);
+showPage(PAGES.PAYMENT);
+    }
+
+    function cancelConfirmedRide(){
+      if(bookingHistory.length === 0){ alert('No booking found.'); showPage(PAGES.BOOKING); return; }
+      bookingHistory[0].status = 'Cancelled';
+      renderHistory();
+      alert('Ride cancelled — you are returned to booking screen.');
+      showPage(PAGES.BOOKING);
+    }
+
+    function renderHistory(){
+      const list = $('historyList'); list.innerHTML = '';
+      if(bookingHistory.length === 0){
+        list.innerHTML = `<div style="padding:12px;border-radius:10px;background:rgba(255,255,255,0.95);">No bookings yet — try booking a ride!</div>`;
+        return;
+      }
+      bookingHistory.forEach(b=>{
+        const item = document.createElement('div'); item.className='history-item';
+        item.innerHTML = `
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div style="width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:white;display:flex;align-items:center;justify-content:center;font-weight:800;">${b.platform[0]}</div>
+            <div>
+              <div style="font-weight:800">${b.platform} • ${b.vehicle} • ${formatCurrency(b.price)}</div>
+              <div class="muted-small">${b.pickup.split(',')[0]} → ${b.drop.split(',')[0]} • ${b.date}</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:800;color:${b.status==='Booked'?'#064b46':'#a33'}">${b.status}</div>
+            <div class="muted-small" style="margin-top:6px;">ID: ${b.id}</div>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function setDriverAvatarIcon(vehicle){
+      const mapIcon = {'Bike':'🏍️','Auto':'🛺','Sedan':'🚗','SUV':'🚙','Mini':'🚕','EV Car':'⚡🚗'};
+      $('driverAvatar').textContent = mapIcon[vehicle] || '🧑‍✈️';
+    }
+
+    // Preselect demo values so user can try immediately
+    function preselectDemo(){
+      const st = 'Maharashtra';
+      if(STATE_CITY_MAP[st]){
+        $('homeState').value = st;
+        populateCityForState('homeState','homeCity');
+        setTimeout(()=>{ $('homeCity').value = 'Mumbai'; }, 10);
+
+        // Also set booking defaults
+        $('stateSelect').value = st;
+        populateCityForState('stateSelect');
+        setTimeout(()=>{ $('citySelect').value = 'Mumbai'; populateLocationDatalists(st,'Mumbai'); }, 10);
+      }
+    }
+
+    // Expose nothing global except init reference for debug
+    init();
+    window.fairfareMerged = { STATE_CITY_MAP, PLATFORMS, bookingHistory };
+
+    // Accessibility: observe show/hide pages to attach any last-minute UI updates
+    const observer = new MutationObserver((mutations)=>{ mutations.forEach(m=>{ if(m.attributeName === 'class'){ const el = m.target; if(el.classList.contains('active') && el.id === PAGES.CONFIRMED){ if(bookingHistory.length){ setDriverAvatarIcon(bookingHistory[0].vehicle); } } } }); });
+    document.querySelectorAll('.page').forEach(p=>observer.observe(p,{attributes:true}));
+  </script>
+</body>
+</html>
